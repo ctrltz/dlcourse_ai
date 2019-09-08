@@ -3,7 +3,7 @@ import numpy as np
 
 class KNN:
     """
-    K-neariest-neighbor classifier using L1 loss
+    K-nearest-neighbor classifier using L1 loss
     """
     def __init__(self, k=1):
         self.k = k
@@ -136,10 +136,16 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
+        num_classes = len(np.unique(self.train_y))
         pred = np.zeros(num_test, np.int)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            # Get classes of K nearest neighbors
+            classes = list(map(lambda x: self.train_y[x], 
+                               np.argsort(dists[i, :])[:self.k].tolist()))
+
+            # Majority vote
+            counts = np.zeros((num_classes,))
+            for c in classes:
+                counts[c] += 1
+            pred[i] = np.argmax(counts)
         return pred
