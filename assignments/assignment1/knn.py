@@ -54,8 +54,8 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
-                pass
+                dists[i_test, i_train] = np.sum(np.abs(self.train_X[i_train, :] - X[i_test, :]))
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -73,9 +73,8 @@ class KNN:
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            # TODO: Fill the whole row of dists[i_test]
-            # without additional loops or list comprehensions
-            pass
+            dists[i_test, :] = np.sum(np.abs(self.train_X - X[i_test, :]), axis=1)
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -91,10 +90,18 @@ class KNN:
         '''
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
+
+        # TODO: fix no loop implementation
+
         # Using float32 to to save memory - the default is float64
-        dists = np.zeros((num_test, num_train), np.float32)
-        # TODO: Implement computing all distances with no loops!
-        pass
+        # Using outer to calculate between each element of arrays
+        # Shape of the result: (num_test_samples, num_train_samples, num_features, num_features)
+        # diff = np.subtract.outer(X.astype(np.float32), self.train_X.astype(np.float32), dtype=np.float32).swapaxes(1, 2)
+
+        # Aggregate all subtractions to get L1 distance
+        # dists = np.trace(np.abs(diff), axis1=2, axis2=3)
+        # return dists
+        return self.compute_distances_one_loop(X)
 
     def predict_labels_binary(self, dists):
         '''
@@ -111,9 +118,9 @@ class KNN:
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            classes = list(map(lambda x: self.train_y[x], 
+                               np.argsort(dists[i, :])[:self.k].tolist()))
+            pred[i] = 2 * sum(classes) >= len(classes)
         return pred
 
     def predict_labels_multiclass(self, dists):
