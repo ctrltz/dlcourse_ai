@@ -91,17 +91,11 @@ class KNN:
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
 
-        # TODO: fix no loop implementation
+        changed_test = X.swapaxes(0, 1)[:, :, np.newaxis]
+        changed_train = self.train_X.swapaxes(0, 1)[:, np.newaxis, :]
 
-        # Using float32 to to save memory - the default is float64
-        # Using outer to calculate between each element of arrays
-        # Shape of the result: (num_test_samples, num_train_samples, num_features, num_features)
-        # diff = np.subtract.outer(X.astype(np.float32), self.train_X.astype(np.float32), dtype=np.float32).swapaxes(1, 2)
-
-        # Aggregate all subtractions to get L1 distance
-        # dists = np.trace(np.abs(diff), axis1=2, axis2=3)
-        # return dists
-        return self.compute_distances_one_loop(X)
+        dists = np.sum(np.abs(changed_test - changed_train), axis=0, dtype=np.float32)
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
