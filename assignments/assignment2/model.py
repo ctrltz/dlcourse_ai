@@ -17,8 +17,12 @@ class TwoLayerNet:
         reg, float - L2 regularization strength
         """
         self.reg = reg
-        # TODO Create necessary layers
-        raise Exception("Not implemented!")
+
+        # Network architecture
+        self.layers = {'Linear1': FullyConnectedLayer(n_input, hidden_layer_size),
+                       'ReLU1': ReLULayer(),
+                       'Linear2': FullyConnectedLayer(hidden_layer_size, n_output),
+                       'ReLU2': ReLULayer()}
 
     def compute_loss_and_gradients(self, X, y):
         """
@@ -31,16 +35,21 @@ class TwoLayerNet:
         """
         # Before running forward and backward pass through the model,
         # clear parameter gradients aggregated from the previous pass
-        # TODO Set parameter gradient to zeros
-        # Hint: using self.params() might be useful!
-        raise Exception("Not implemented!")
+        for param in self.params().values():
+            param.grad = np.zeros_like(param.value)
         
-        # TODO Compute loss and fill param gradients
+        # Compute loss and fill param gradients
         # by running forward and backward passes through the model
+        layers = list(self.layers.values())
+        for layer in layers:
+            X = layer.forward(X)
+        loss, grad = softmax_with_cross_entropy(X, y)
+        for layer in layers[::-1]:
+            grad = layer.backward(grad)
         
         # After that, implement l2 regularization on all params
         # Hint: self.params() is useful again!
-        raise Exception("Not implemented!")
+        # raise Exception("Not implemented!")
 
         return loss
 
@@ -65,8 +74,8 @@ class TwoLayerNet:
     def params(self):
         result = {}
 
-        # TODO Implement aggregating all of the params
-
-        raise Exception("Not implemented!")
+        for layer_label, layer in self.layers.items():
+            for param_label, param in layer.params().items():
+                result[f'{layer_label}_{param_label}'] = param
 
         return result

@@ -23,14 +23,24 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
 
     assert analytic_grad.shape == x.shape
 
+    # Delta array for numeric gradient computation
+    x_delta = np.zeros(x.shape)
+
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
     while not it.finished:
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
-        numeric_grad_at_ix = 0
 
-        # TODO Copy from previous assignment
-        raise Exception("Not implemented!")
+        # Introduce delta at current index
+        x_delta[ix] = delta
+
+        # Compute numeric gradient
+        f_plus, _ = f(x + x_delta)
+        f_minus, _ = f(x - x_delta)
+        numeric_grad_at_ix = (f_plus - f_minus) / (2 * delta)
+
+        # Back to zero for further use
+        x_delta[ix] = 0
 
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
             print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (
